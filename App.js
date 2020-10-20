@@ -2,50 +2,76 @@ import React, {useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
-  ScrollView,
   View,
   Text,
   StatusBar,
   Button,
+  Dimensions,
+  Vibration,
+  Alert,
 } from 'react-native';
+import {RNCamera as Camera} from 'react-native-camera';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 
-import QRCodeScanner from 'react-native-qrcode-scanner';
-
 const App = () => {
-  const [qr, setQr] = useState('');
+  const [qrData, setQrData] = useState('');
+  const [scanning, setScanning] = useState(false);
   const [scanner, setScanner] = useState(null);
 
   const onRead = (e) => {
-    setQr(e.data);
+    try {
+      if (!e.data || scanning) return;
+      Vibration.vibrate();
+      setScanning(true);
+      setQrData(e.data);
+      Alert.alert('Data', e.data, [{text: 'Ok', onPress: () => onResetScan()}]);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const onResetScan = () => {
-    setQr('');
-    scanner.reactivate();
+    setScanning(false);
+    setQrData('');
+    setScanner(null);
+    // scanner.reactivate();
   };
 
   return (
-    <>
+    <React.Fragment>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={styles.container}>
-        <ScrollView contentInsetAdjustmentBehavior="automatic">
-          <View style={styles.titleContainer}>
-            <Text style={styles.sectionTitle}>QR code scanning</Text>
+        {
+          <View style={styles.header}>
+            <Text style={styles.sectionTitle}>QR Code Scanning</Text>
           </View>
-          {<QRCodeScanner ref={(node) => setScanner(node)} onRead={onRead} />}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>
-                Wearable: <Text style={styles.data}>{qr}</Text>
-              </Text>
-              <Button title="Scan again" onPress={onResetScan} />
-            </View>
+        }
+        {
+          <View style={styles.cameraContainer}>
+            <Camera
+              androidCameraPermissionOptions={{
+                title: 'Permission to use camera',
+                message: 'We need your permission to use your camera',
+                buttonPositive: 'Ok',
+              }}
+              ratio={'1:1'}
+              style={styles.cameraContainer}
+              onBarCodeRead={onRead}
+              vibrate={true}
+              captureAudio={false}></Camera>
           </View>
-        </ScrollView>
+        }
+        {
+          <View style={styles.footer}>
+            <Text style={styles.sectionTitle}>
+              <Text style={styles.data}>{qrData}</Text>
+            </Text>
+            <Button title="Scan again" onPress={onResetScan} />
+          </View>
+        }
       </SafeAreaView>
-    </>
+    </React.Fragment>
   );
 };
 
@@ -56,15 +82,24 @@ const styles = StyleSheet.create({
   body: {
     backgroundColor: Colors.white,
   },
-  titleContainer: {
-    width: '100%',
-    height: 50,
+  header: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  cameraContainer: {
+    // flex: 1,
+    flex: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    height: Dimensions.get('window').width,
+    width: Dimensions.get('window').width,
+  },
+  footer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   sectionTitle: {
     fontSize: 24,
