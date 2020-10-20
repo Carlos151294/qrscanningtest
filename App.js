@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
+  ScrollView,
   View,
   Text,
   StatusBar,
@@ -11,8 +12,6 @@ import {
   Alert,
 } from 'react-native';
 import {RNCamera as Camera} from 'react-native-camera';
-
-import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 const App = () => {
   const [qrData, setQrData] = useState('');
@@ -43,33 +42,29 @@ const App = () => {
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={styles.container}>
         {
-          <View style={styles.header}>
-            <Text style={styles.sectionTitle}>QR Code Scanning</Text>
+          <View style={styles.overlay}>
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>QR Code Scanning</Text>
+            </View>
+            <View style={styles.footer}>
+              <Text style={styles.headerTitle}></Text>
+            </View>
           </View>
         }
         {
-          <View style={styles.cameraContainer}>
-            <Camera
-              androidCameraPermissionOptions={{
-                title: 'Permission to use camera',
-                message: 'We need your permission to use your camera',
-                buttonPositive: 'Ok',
-              }}
-              ratio={'1:1'}
-              style={styles.cameraContainer}
-              onBarCodeRead={onRead}
-              vibrate={true}
-              captureAudio={false}></Camera>
-          </View>
+          <Camera
+            androidCameraPermissionOptions={{
+              title: 'Permission to use camera',
+              message: 'App needs your permission to use your camera',
+              buttonPositive: 'Ok',
+            }}
+            style={styles.cameraContainer}
+            onBarCodeRead={onRead}
+            vibrate={true}
+            captureAudio={false}
+          />
         }
-        {
-          <View style={styles.footer}>
-            <Text style={styles.sectionTitle}>
-              <Text style={styles.data}>{qrData}</Text>
-            </Text>
-            <Button title="Scan again" onPress={onResetScan} />
-          </View>
-        }
+        {}
       </SafeAreaView>
     </React.Fragment>
   );
@@ -77,38 +72,44 @@ const App = () => {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 20,
     flex: 1,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  header: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: 'relative',
+    backgroundColor: 'gray',
   },
   cameraContainer: {
-    // flex: 1,
-    flex: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-    height: Dimensions.get('window').width,
+    position: 'absolute',
+    left: 0,
+    top: 0,
     width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+    backgroundColor: 'green',
+    zIndex: -1,
+  },
+  overlay: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: '100%',
+    height: '100%',
+    // backgroundColor: 'red',
+    justifyContent: 'space-between',
+  },
+  header: {
+    height: Dimensions.get('window').height / 3,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 24, 
+    fontWeight: '600'
   },
   footer: {
-    flex: 1,
+    height: Dimensions.get('window').height / 3,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  data: {
-    fontWeight: '300',
-  },
+    alignItems: 'center'
+  }
 });
 
 export default App;
